@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.udacity.jdnd.course3.critter.utils.EntityUtils.convertFromDTOToEntity;
+import static com.udacity.jdnd.course3.critter.utils.EntityUtils.createScheduleDTO;
 
 /**
  * Handles web requests related to Schedules.
@@ -23,28 +25,45 @@ public class ScheduleController {
 
 
     @PostMapping
-    public Schedule createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
+    public ScheduleDTO createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
         Schedule schedule = convertFromDTOToEntity(scheduleDTO, new Schedule());
-        return this.scheduleService.saveSchedule(schedule, scheduleDTO.getPetIds(), scheduleDTO.getEmployeeIds());
+        return createScheduleDTO(
+                this.scheduleService.saveSchedule(schedule, scheduleDTO.getPetIds(), scheduleDTO.getEmployeeIds()));
     }
 
     @GetMapping
-    public List<Schedule> getAllSchedules() {
-        return this.scheduleService.findAllSchedules();
+    public List<ScheduleDTO> getAllSchedules() {
+        return this.scheduleService
+                .findAllSchedules()
+                .stream()
+                .map(schedule -> createScheduleDTO(schedule))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/pet/{petId}")
-    public List<Schedule> getScheduleForPet(@PathVariable long petId) {
-        return this.scheduleService.findScheduleByPetId(petId);
+    public List<ScheduleDTO> getScheduleForPet(@PathVariable long petId) {
+        return this.scheduleService
+                .findScheduleByPetId(petId)
+                .stream()
+                .map(schedule -> createScheduleDTO(schedule))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/employee/{employeeId}")
-    public List<Schedule> getScheduleForEmployee(@PathVariable long employeeId) {
-        return this.scheduleService.findScheduleByEmployeeId(employeeId);
+    public List<ScheduleDTO> getScheduleForEmployee(@PathVariable long employeeId) {
+        return this.scheduleService
+                .findScheduleByEmployeeId(employeeId)
+                .stream()
+                .map(schedule -> createScheduleDTO(schedule))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/customer/{customerId}")
-    public List<Schedule> getScheduleForCustomer(@PathVariable long customerId) {
-        return this.scheduleService.findScheduleByCustomerId(customerId);
+    public List<ScheduleDTO> getScheduleForCustomer(@PathVariable long customerId) {
+        return this.scheduleService
+                .findScheduleByCustomerId(customerId)
+                .stream()
+                .map(schedule -> createScheduleDTO(schedule))
+                .collect(Collectors.toList());
     }
 }

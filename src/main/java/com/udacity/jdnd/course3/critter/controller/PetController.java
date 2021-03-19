@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.udacity.jdnd.course3.critter.utils.EntityUtils.convertFromDTOToEntity;
+import static com.udacity.jdnd.course3.critter.utils.EntityUtils.createPetDTO;
 
 /**
  * Handles web requests related to Pets.
@@ -21,23 +23,31 @@ public class PetController {
     PetService petService;
 
     @PostMapping
-    public Pet savePet(@RequestBody PetDTO petDTO) {
+    public PetDTO savePet(@RequestBody PetDTO petDTO) {
         Pet pet = convertFromDTOToEntity(petDTO, new Pet());
-        return petService.savePet(pet, petDTO.getOwnerId());
+        return createPetDTO(petService.savePet(pet, petDTO.getOwnerId()));
     }
 
     @GetMapping("/{petId}")
-    public Pet getPet(@PathVariable long petId) {
-        return this.petService.findPetById(petId);
+    public PetDTO getPet(@PathVariable long petId) {
+        return createPetDTO(this.petService.findPetById(petId));
     }
 
     @GetMapping
-    public List<Pet> getPets(){
-        return this.petService.findAllPets();
+    public List<PetDTO> getPets(){
+        return this.petService
+                .findAllPets()
+                .stream()
+                .map(pet -> createPetDTO(pet))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/owner/{ownerId}")
-    public List<Pet> getPetsByOwner(@PathVariable long ownerId) {
-        return this.petService.findPetsByOwnerId(ownerId);
+    public List<PetDTO> getPetsByOwner(@PathVariable long ownerId) {
+        return this.petService
+                .findPetsByOwnerId(ownerId)
+                .stream()
+                .map(pet -> createPetDTO(pet))
+                .collect(Collectors.toList());
     }
 }

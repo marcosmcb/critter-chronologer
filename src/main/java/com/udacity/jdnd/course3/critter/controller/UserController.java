@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.udacity.jdnd.course3.critter.utils.EntityUtils.convertFromDTOToEntity;
+import static com.udacity.jdnd.course3.critter.utils.EntityUtils.*;
 
 /**
  * Handles web requests related to Users.
@@ -31,41 +32,49 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/customer")
-    public Customer saveCustomer(@RequestBody CustomerDTO customerDTO){
+    public CustomerDTO saveCustomer(@RequestBody CustomerDTO customerDTO){
         Customer customer = convertFromDTOToEntity(customerDTO, new Customer());
-        return this.userService.saveCustomer(customer, customerDTO.getPetIds());
+        return createCustomerDTO(this.userService.saveCustomer(customer, customerDTO.getPetIds()));
     }
 
     @GetMapping("/customer")
-    public List<Customer> getAllCustomers(){
-        return this.userService.findAllCustomers();
+    public List<CustomerDTO> getAllCustomers(){
+        return this.userService
+                .findAllCustomers()
+                .stream()
+                .map(customer -> createCustomerDTO(customer))
+                .collect(Collectors.toList());
     }
 
 
     @PostMapping("/employee")
-    public Employee saveEmployee(@RequestBody EmployeeDTO employeeDTO) {
+    public EmployeeDTO saveEmployee(@RequestBody EmployeeDTO employeeDTO) {
         Employee employee = convertFromDTOToEntity(employeeDTO, new Employee());
-        return this.userService.saveEmployee(employee);
+        return createEmployeeDTO(this.userService.saveEmployee(employee));
     }
 
     @GetMapping("/employee/{employeeId}")
-    public Employee getEmployee(@PathVariable long employeeId) {
-        return this.userService.findEmployeeById(employeeId);
+    public EmployeeDTO getEmployee(@PathVariable long employeeId) {
+        return createEmployeeDTO(this.userService.findEmployeeById(employeeId));
     }
 
     @GetMapping("/customer/pet/{petId}")
-    public Customer getOwnerByPet(@PathVariable long petId){
-        return this.userService.findOwnerByPet(petId);
+    public CustomerDTO getOwnerByPet(@PathVariable long petId){
+        return createCustomerDTO(this.userService.findOwnerByPet(petId));
     }
 
 
     @PutMapping("/employee/{employeeId}")
-    public Employee setAvailability(@RequestBody Set<DayOfWeek> daysAvailable, @PathVariable long employeeId) {
-        return this.userService.setEmployeeAvailability(daysAvailable, employeeId);
+    public EmployeeDTO setAvailability(@RequestBody Set<DayOfWeek> daysAvailable, @PathVariable long employeeId) {
+        return createEmployeeDTO(this.userService.setEmployeeAvailability(daysAvailable, employeeId));
     }
 
     @GetMapping("/employee/availability")
-    public List<Employee> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) {
-        return this.userService.findEmployeesAvailable(employeeDTO.getSkills(), employeeDTO.getDate());
+    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) {
+        return this.userService
+                .findEmployeesAvailable(employeeDTO.getSkills(), employeeDTO.getDate())
+                .stream()
+                .map(employee -> createEmployeeDTO(employee))
+                .collect(Collectors.toList());
     }
 }

@@ -48,7 +48,9 @@ public class UserService {
     }
 
     public Customer findCustomerById(Long customerId) {
-        return this.customerRepository.findById(customerId).orElseThrow(() -> new ItemNotFoundException("couldn't find customer with id " + customerId));
+        return this.customerRepository
+                .findById(customerId)
+                .orElseThrow(() -> new ItemNotFoundException("couldn't find customer with id " + customerId));
     }
 
     public List<Customer> findAllCustomers() {
@@ -68,7 +70,11 @@ public class UserService {
 
 
     public List<Employee> findEmployeesAvailable(Set<EmployeeSkill> skills, LocalDate date) {
-        return this.employeeRepository.findAllBySkillsInAndDaysAvailable(skills, date.getDayOfWeek());
+        return this.employeeRepository
+                .findAllByDaysAvailable(date.getDayOfWeek())
+                .stream()
+                .filter(employee -> employee.getSkills().containsAll(skills))
+                .collect(Collectors.toList());
     }
 
     public Customer findOwnerByPet(long petId) {
